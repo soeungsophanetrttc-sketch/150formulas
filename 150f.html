@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>500 MCQ Formula Engine - Master Edition (150 Formulas)</title>
+    
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script>
+    window.MathJax = {
+      loader: {load: ['[tex]/mhchem']},
+      tex: { packages: {'[+]': ['mhchem']}, inlineMath: [['$', '$'], ['\\(', '\\)']] },
+      svg: { fontCache: 'global' }
+    };
+    </script>
+    <script type="text/javascript" id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+
+    <style>
+        body { font-family: 'Kantumruy Pro', sans-serif; background-color: #f8fafc; background-image: radial-gradient(#cbd5e1 1px, transparent 1px); background-size: 24px 24px; }
+        .brand-font { font-family: 'Playfair Display', serif; }
+        .card-hover { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .card-hover:hover { transform: translateY(-5px); box-shadow: 0 15px 25px -5px rgba(0, 0, 0, 0.1); }
+        
+        .math-scroll-wrapper { width: 100%; overflow-x: auto; overflow-y: hidden; -webkit-overflow-scrolling: touch; text-align: center; padding: 15px 10px; box-sizing: border-box; }
+        .math-inner { display: inline-block; min-width: min-content; }
+        .math-scroll-wrapper::-webkit-scrollbar { height: 5px; }
+        .math-scroll-wrapper::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 10px; }
+        .math-scroll-wrapper::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 10px; }
+        .math-scroll-wrapper::-webkit-scrollbar-thumb:hover { background: #64748b; }
+        
+        mjx-container { font-size: 115% !important; margin: 0 !important; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useMemo, useRef } = React;
+
+        // ==========================================
+        // 150 MASTER FORMULAS DATABASE
+        // ==========================================
+        const preloadedData = [
+            // --- បរិមាណវិភាគ និង សូលុយស្យុង (1-10) ---
+            { id: "c01", name: "ម៉ូល និងម៉ាស", formula: "n = \\frac{m}{M}", vars: "n=ម៉ូល; m=ម៉ាស (g); M=ម៉ាសម៉ូល", level: "NIE", tags: ["បរិមាណវិភាគ"], q: "តើ 20g នៃ NaOH មានប៉ុន្មានម៉ូល?" },
+            { id: "c02", name: "មាឌឧស្ម័ននៅ STP", formula: "n = \\frac{V}{22.4}", vars: "n=ម៉ូល; V=មាឌ (L)", level: "NIE", tags: ["បរិមាណវិភាគ"], q: "គណនាម៉ូលឧស្ម័នអុកស៊ីសែនដែលមានមាឌ 44.8L។" },
+            { id: "c03", name: "ចំនួនភាគល្អិត", formula: "n = \\frac{N}{N_A}", vars: "N=ចំនួនអាតូម/ម៉ូលេគុល; N_A=6.022\\times10^{23}", level: "NIE", tags: ["បរិមាណវិភាគ"], q: "តើទឹក 1 ម៉ូលមានប៉ុន្មានម៉ូលេគុល?" },
+            { id: "c04", name: "កំហាប់ជាម៉ូល", formula: "C = \\frac{n}{V}", vars: "C=កំហាប់ម៉ូល (M); V=មាឌ (L)", level: "NIE", tags: ["សូលុយស្យុង"], q: "រកកំហាប់សូលុយស្យុងដែលមាន 0.5mol ក្នុង 2L។" },
+            { id: "c05", name: "កំហាប់ម៉ូឡាលីតេ", formula: "m = \\frac{n_{solute}}{W_{solvent(kg)}}", vars: "m=ម៉ូឡាលីតេ; W=ម៉ាសធាតុរំលាយគិតជា kg", level: "NIE", tags: ["សូលុយស្យុង"], q: "វាស់កំហាប់ដែលមិនប្រែប្រួលតាមសីតុណ្ហភាព។" },
+            { id: "c06", name: "កំហាប់ណរម៉ាល់", formula: "N = C \\times n_{factor}", vars: "N=ណរម៉ាល់; n=ចំនួនអេគីវ៉ាឡង់", level: "NIE", tags: ["សូលុយស្យុង"], q: "រកកំហាប់ណរម៉ាល់នៃ H2SO4 កំហាប់ 1M។" },
+            { id: "c07", name: "សមីការពង្រាវ", formula: "C_1 V_1 = C_2 V_2", vars: "C=កំហាប់; V=មាឌ", level: "NIE", tags: ["សូលុយស្យុង"], q: "តើត្រូវថែមទឹកប៉ុន្មានដើម្បីពង្រាវពី 2M ទៅ 1M?" },
+            { id: "c08", name: "ភាគរយជាម៉ាស", formula: "\\% w/w = \\frac{m_{solute}}{m_{solution}} \\times 100", vars: "m=ម៉ាស", level: "NIE", tags: ["សូលុយស្យុង"], q: "គណនា % អំបិលក្នុងទឹកសមុទ្រ។" },
+            { id: "c09", name: "ប្រភាគម៉ូល", formula: "\\chi_A = \\frac{n_A}{n_{total}}", vars: "\\chi_A=ប្រភាគម៉ូល; n=ម៉ូល", level: "NIE", tags: ["សូលុយស្យុង"], q: "ប្រភាគម៉ូលសរុបមានតម្លៃស្មើប៉ុន្មាន?" },
+            { id: "c10", name: "ទិន្នផលភាគរយ", formula: "\\% Yield = \\frac{m_{actual}}{m_{theo}} \\times 100", vars: "actual=ម៉ាសជាក់ស្តែង; theo=ម៉ាសទ្រឹស្តី", level: "NIE", tags: ["បរិមាណវិភាគ"], q: "គណនាប្រសិទ្ធភាពនៃប្រតិកម្មគីមី។" },
+            // --- ឧស្ម័ន (11-20) ---
+            { id: "c11", name: "ឧស្ម័នបរិសុទ្ធ", formula: "PV = nRT", vars: "P=សម្ពាធ; V=មាឌ; R=0.0821; T=Kelvin", level: "NIE", tags: ["ឧស្ម័ន"], q: "គណនាសម្ពាធឧស្ម័ន 1 ម៉ូលនៅ 300K។" },
+            { id: "c12", name: "ច្បាប់បយម៉ារីយុត", formula: "P_1 V_1 = P_2 V_2", vars: "T ថេរ", level: "NIE", tags: ["ឧស្ម័ន"], q: "ទំនាក់ទំនងច្រាសរវាងសម្ពាធ និងមាឌ។" },
+            { id: "c13", name: "ច្បាប់សាល", formula: "\\frac{V_1}{T_1} = \\frac{V_2}{T_2}", vars: "P ថេរ", level: "NIE", tags: ["ឧស្ម័ន"], q: "មាឌឧស្ម័នសមាមាត្រនឹងសីតុណ្ហភាព។" },
+            { id: "c14", name: "ច្បាប់ហ្គេលុយសាក់", formula: "\\frac{P_1}{T_1} = \\frac{P_2}{T_2}", vars: "V ថេរ", level: "NIE", tags: ["ឧស្ម័ន"], q: "សម្ពាធកើនឡើងនៅពេលដុតកម្តៅស៊ីឡាំងបិទជិត។" },
+            { id: "c15", name: "ច្បាប់ដាល់តុន", formula: "P_{total} = P_A + P_B + P_C", vars: "P=សម្ពាធដោយឡែក", level: "NIE", tags: ["ឧស្ម័ន"], q: "សម្ពាធសរុបនៃល្បាយឧស្ម័ន។" },
+            { id: "c16", name: "សម្ពាធដោយឡែក", formula: "P_A = \\chi_A \\times P_{total}", vars: "\\chi_A=ប្រភាគម៉ូល", level: "NIE", tags: ["ឧស្ម័ន"], q: "គណនាសម្ពាធឧស្ម័ននីមួយៗក្នុងល្បាយ។" },
+            { id: "c17", name: "ល្បឿនប្រសិទ្ធ", formula: "u_{rms} = \\sqrt{\\frac{3RT}{M}}", vars: "R=8.314; M=ម៉ាសម៉ូល (kg/mol)", level: "NIE", tags: ["ឧស្ម័ន"], q: "ល្បឿនភាគល្អិតឧស្ម័នធៀបនឹងសីតុណ្ហភាព។" },
+            { id: "c18", name: "ច្បាប់ក្រាហាំ", formula: "\\frac{v_1}{v_2} = \\sqrt{\\frac{M_2}{M_1}}", vars: "v=ល្បឿនបន្សាយ; M=ម៉ាសម៉ូល", level: "NIE", tags: ["ឧស្ម័ន"], q: "ឧស្ម័នស្រាល បន្សាយលឿនជាងឧស្ម័នធ្ងន់។" },
+            { id: "c19", name: "ម៉ាសម៉ូលឧស្ម័ន", formula: "M = \\frac{d R T}{P}", vars: "d=ដង់ស៊ីតេ (g/L)", level: "NIE", tags: ["ឧស្ម័ន"], q: "រកម៉ាសម៉ូលឧស្ម័នពីដង់ស៊ីតេ។" },
+            { id: "c20", name: "ថាមពលស៊ីនេទិចឧស្ម័ន", formula: "KE = \\frac{3}{2} n R T", vars: "KE=ថាមពលស៊ីនេទិចសរុប", level: "NIE", tags: ["ឧស្ម័ន"], q: "ថាមពលនៃចលនាភាគល្អិតឧស្ម័ន។" },
+            // --- អាតូម (21-30) ---
+            { id: "c21", name: "ថាមពលផូតុង", formula: "E = h\\nu = \\frac{hc}{\\lambda}", vars: "h=ថេរ Planck; c=ល្បឿនពន្លឺ; \\lambda=ជំហានរលក", level: "NIE", tags: ["អាតូម"], q: "គណនាថាមពលនៃរលកពន្លឺ។" },
+            { id: "c22", name: "ទំនាក់ទំនងដឺប្រូលី", formula: "\\lambda = \\frac{h}{mv} = \\frac{h}{p}", vars: "m=ម៉ាស; v=ល្បឿន; p=សន្ទុះ", level: "NIE", tags: ["អាតូម"], q: "ភាពជារលកនៃភាគល្អិត។" },
+            { id: "c23", name: "សមីការរីដបឺក", formula: "\\frac{1}{\\lambda} = R_H \\left( \\frac{1}{n_1^2} - \\frac{1}{n_2^2} \\right)", vars: "R_H=ថេរ Rydberg; n=កម្រិតថាមពល", level: "NIE", tags: ["អាតូម"], q: "ជំហានរលកពេលអេឡិចត្រុងលោតកម្រិត។" },
+            { id: "c24", name: "ថាមពលគន្លង Bohr", formula: "E_n = \\frac{-13.6}{n^2} \\text{ eV}", vars: "n=លេខកង់ទិចចម្បង", level: "NIE", tags: ["អាតូម"], q: "ថាមពលអេឡិចត្រុងក្នុងអាតូមអ៊ីដ្រូសែន។" },
+            { id: "c25", name: "កាំអាតូម Bohr", formula: "r_n = 0.529 \\times \\frac{n^2}{Z} \\text{ \\AA}", vars: "Z=លេខអាតូម", level: "NIE", tags: ["អាតូម"], q: "គណនាកាំគន្លងទី១ របស់អ៊ីដ្រូសែន។" },
+            { id: "c26", name: "Heisenberg", formula: "\\Delta x \\cdot \\Delta p \\ge \\frac{h}{4\\pi}", vars: "\\Delta x=លំអៀងទីតាំង; \\Delta p=លំអៀងសន្ទុះ", level: "NIE", tags: ["អាតូម"], q: "គោលការណ៍ភាពមិនប្រាកដប្រជា។" },
+            { id: "c27", name: "ម៉ូម៉ង់ម៉ាញេទិច", formula: "\\mu = \\sqrt{n(n+2)} \\text{ BM}", vars: "n=ចំនួនអេឡិចត្រុងសេស", level: "NIE", tags: ["អាតូម"], q: "គណនាម៉ូម៉ង់ម៉ាញេទិចនៃអ៊ីយ៉ុង Fe3+។" },
+            { id: "c28", name: "កម្លាំងគូឡុំ", formula: "F = k \\frac{q_1 q_2}{r^2}", vars: "q=បន្ទុកអគ្គិសនី; r=ចម្ងាយ", level: "NIE", tags: ["អាតូម"], q: "កម្លាំងទាញរវាងអ៊ីយ៉ុង។" },
+            { id: "c29", name: "ម៉ាសអាតូមមធ្យម", formula: "\\overline{M} = \\sum (M_i \\times \\%_i)", vars: "M_i=ម៉ាសអ៊ីសូតូប; %=ភាគរយធម្មជាតិ", level: "NIE", tags: ["អាតូម"], q: "ម៉ាសអាតូមក្នុងតារាងខួប។" },
+            { id: "c30", name: "បន្ទុកនុយក្លេអ៊ែរសកម្ម", formula: "Z_{eff} = Z - S", vars: "Z=លេខអាតូម; S=កត្តាបាំង (Shielding)", level: "NIE", tags: ["អាតូម"], q: "ច្បាប់ Slater សម្រាប់រកបន្ទុកពិតប្រាកដ។" },
+            // --- ទែម៉ូឌីណាមិច (31-40) ---
+            { id: "c31", name: "ថាមពលកម្ដៅ", formula: "q = m c \\Delta T", vars: "c=កម្ដៅម៉ាស; \\Delta T=បំរែបំរួលសីតុណ្ហភាព", level: "NIE", tags: ["ទែម៉ូឌីណាមិច"], q: "កម្ដៅស្រូបឬបញ្ចេញដោយអង្គធាតុ។" },
+            { id: "c32", name: "ច្បាប់ទី១ ទែម៉ូ", formula: "\\Delta U = q + w", vars: "\\Delta U=ថាមពលក្នុង; q=កម្ដៅ; w=កម្មន្ត", level: "NIE", tags: ["ទែម៉ូឌីណាមិច"], q: "ច្បាប់រក្សាថាមពល។" },
+            { id: "c33", name: "កម្មន្តពង្រីកមាឌ", formula: "w = -P_{ext} \\Delta V", vars: "P=សម្ពាធខាងក្រៅ; \\Delta V=បំរែបំរួលមាឌ", level: "NIE", tags: ["ទែម៉ូឌីណាមិច"], q: "កម្មន្តធ្វើដោយឧស្ម័នពេលរីកមាឌ។" },
+            { id: "c34", name: "អង់តាល់ពី", formula: "\\Delta H = \\Delta U + P\\Delta V", vars: "\\Delta H=បំរែបំរួលអង់តាល់ពី", level: "NIE", tags: ["ទែម៉ូឌីណាមិច"], q: "កម្ដៅនៃប្រតិកម្មនៅសម្ពាធថេរ។" },
+            { id: "c35", name: "ច្បាប់ហេស", formula: "\\Delta H_{rxn} = \\sum \\Delta H_f(prod) - \\sum \\Delta H_f(react)", vars: "H_f=អង់តាល់ពីកំនរ", level: "NIE", tags: ["ទែម៉ូឌីណាមិច"], q: "គណនាកម្ដៅប្រតិកម្មសរុប។" },
+            { id: "c36", name: "ថាមពលសេរីគីប", formula: "\\Delta G = \\Delta H - T\\Delta S", vars: "\\Delta S=អង់ត្រូពី", level: "NIE", tags: ["ទែម៉ូឌីណាមិច"], q: "ទស្សន៍ទាយភាពកើតឯងនៃប្រតិកម្ម។" },
+            { id: "c37", name: "ថាមពលសេរី & លំនឹង", formula: "\\Delta G^\\circ = -RT \\ln K", vars: "K=ថេរលំនឹង", level: "NIE", tags: ["ទែម៉ូឌីណាមិច"], q: "ទំនាក់ទំនងរវាងលំនឹង និងថាមពល។" },
+            { id: "c38", name: "ក្លេប៉េរ៉ុង (Clausius)", formula: "\\ln \\frac{P_2}{P_1} = \\frac{\\Delta H_{vap}}{R} \\left( \\frac{1}{T_1} - \\frac{1}{T_2} \\right)", vars: "\\Delta H_{vap}=កម្ដៅរំហួត", level: "NIE", tags: ["ទែម៉ូឌីណាមិច"], q: "ទំនាក់ទំនងសម្ពាធចំហាយ និងសីតុណ្ហភាព។" },
+            { id: "c39", name: "ប្រសិទ្ធភាព Carnot", formula: "\\eta = 1 - \\frac{T_C}{T_H}", vars: "T_C=ត្រជាក់; T_H=ក្ដៅ", level: "NIE", tags: ["ទែម៉ូឌីណាមិច"], q: "ប្រសិទ្ធភាពអតិបរមានៃម៉ាស៊ីនកម្ដៅ។" },
+            { id: "c40", name: "ច្បាប់ស្តេហ្វាន-បូលស្មាន", formula: "E = \\sigma T^4", vars: "\\sigma=ថេរ Stefan-Boltzmann", level: "NIE", tags: ["ទែម៉ូឌីណាមិច"], q: "វិទ្យុសកម្មកម្ដៅនៃអង្គធាតុខ្មៅ។" },
+            // --- សូលុយស្យុង និង លក្ខណៈកូលីហ្កាទីវ (41-50) ---
+            { id: "c41", name: "ច្បាប់រ៉ាអ៊ូ", formula: "P_A = P^0_A \\cdot \\chi_A", vars: "P^0=សម្ពាធចំហាយសុទ្ធ; \\chi_A=ប្រភាគម៉ូល", level: "NIE", tags: ["សូលុយស្យុង"], q: "សម្ពាធចំហាយនៃសូលុយស្យុង។" },
+            { id: "c42", name: "ការថយសម្ពាធចំហាយ", formula: "\\frac{P^0 - P_s}{P^0} = \\chi_{solute}", vars: "P_s=សម្ពាធសូលុយស្យុង", level: "NIE", tags: ["សូលុយស្យុង"], q: "ការប្រែប្រួលសម្ពាធចំហាយធៀប។" },
+            { id: "c43", name: "កំណើនរំពុះ", formula: "\\Delta T_b = i \\cdot K_b \\cdot m", vars: "K_b=ថេររំពុះ; m=ម៉ូឡាលីតេ; i=Van't Hoff", level: "NIE", tags: ["សូលុយស្យុង"], q: "ហេតុអ្វីទឹកអំបិលពុះយឺតជាងទឹកសុទ្ធ?" },
+            { id: "c44", name: "ការបន្ថយចំណុចកំណក", formula: "\\Delta T_f = i \\cdot K_f \\cdot m", vars: "K_f=ថេរកក; m=ម៉ូឡាលីតេ", level: "NIE", tags: ["សូលុយស្យុង"], q: "ការប្រើអំបិលដើម្បីរំលាយទឹកកក។" },
+            { id: "c45", name: "សម្ពាធអូស្មូស", formula: "\\pi = i C R T", vars: "\\pi=សម្ពាធអូស្មូស; C=កំហាប់ម៉ូល", level: "NIE", tags: ["សូលុយស្យុង"], q: "សម្ពាធកាត់ភ្នាសពាក់កណ្តាលជ្រាប។" },
+            { id: "c46", name: "Van't Hoff (បំបែក)", formula: "i = 1 + (n - 1)\\alpha", vars: "\\alpha=កម្រិតបំបែក", level: "NIE", tags: ["សូលុយស្យុង"], q: "ការគណនាចំនួនភាគល្អិតសរុប។" },
+            { id: "c47", name: "Van't Hoff (ភ្ជាប់)", formula: "i = 1 - (1 - \\frac{1}{n})\\alpha", vars: "n=ចំនួនម៉ូលេគុលភ្ជាប់គ្នា", level: "NIE", tags: ["សូលុយស្យុង"], q: "សម្រាប់ករណី Dimerization របស់អាស៊ីត។" },
+            { id: "c48", name: "ច្បាប់ហេនរី", formula: "P_{gas} = K_H \\cdot \\chi_{gas}", vars: "K_H=ថេរ Henry", level: "NIE", tags: ["សូលុយស្យុង"], q: "ភាពរលាយនៃឧស្ម័នក្នុងអង្គធាតុរាវ។" },
+            { id: "c49", name: "ភាគរយមាឌ/មាឌ", formula: "\\% v/v = \\frac{V_{solute}}{V_{solution}} \\times 100", vars: "V=មាឌ", level: "NIE", tags: ["សូលុយស្យុង"], q: "វាស់កម្រិតអាល់កុលក្នុងស្រា។" },
+            { id: "c50", name: "ភាគរយម៉ាស/មាឌ", formula: "\\% w/v = \\frac{m_{solute}}{V_{solution}} \\times 100", vars: "m=g; V=mL", level: "NIE", tags: ["សូលុយស្យុង"], q: "កំហាប់អំបិលក្នុងសេរ៉ូមគឺ 0.9% w/v។" },
+            // --- លំនឹង និង អាស៊ីតបាស (51-65) ---
+            { id: "c51", name: "ថេរលំនឹង Kc", formula: "K_c = \\frac{[C]^c [D]^d}{[A]^a [B]^b}", vars: "[]=កំហាប់ម៉ូល", level: "NIE", tags: ["លំនឹងគីមី"], q: "កំណត់ទិសដៅនៃប្រតិកម្ម។" },
+            { id: "c52", name: "ទំនាក់ទំនង Kp & Kc", formula: "K_p = K_c (RT)^{\\Delta n}", vars: "\\Delta n=ម៉ូលឧស្ម័នផលិតផល - ប្រតិករ", level: "NIE", tags: ["លំនឹងគីមី"], q: "លំនឹងសម្រាប់ប្រតិកម្មឧស្ម័ន។" },
+            { id: "c53", name: "ផលគុណអ៊ីយ៉ុងទឹក Kw", formula: "K_w = [H^+][OH^-] = 10^{-14}", vars: "នៅ 25°C", level: "NIE", tags: ["អាស៊ីតបាស"], q: "មូលដ្ឋានគ្រឹះនៃមាត្រដ្ឋាន pH។" },
+            { id: "c54", name: "pH អាស៊ីត", formula: "\\text{pH} = -\\log [H^+]", vars: "[H+]=កំហាប់អ៊ីយ៉ុង H+", level: "NIE", tags: ["អាស៊ីតបាស"], q: "កំណត់ភាពអាស៊ីតនៃសូលុយស្យុង។" },
+            { id: "c55", name: "pOH បាស", formula: "\\text{pOH} = -\\log [OH^-]", vars: "[OH-]=កំហាប់អ៊ីយ៉ុង OH-", level: "NIE", tags: ["អាស៊ីតបាស"], q: "កំណត់ភាពបាសនៃសូលុយស្យុង។" },
+            { id: "c56", name: "ថេរអាស៊ីតខ្សោយ Ka", formula: "K_a = \\frac{[H^+][A^-]}{[HA]}", vars: "កម្លាំងអាស៊ីត", level: "NIE", tags: ["អាស៊ីតបាស"], q: "វាស់កម្លាំងរបស់អាស៊ីតខ្សោយ។" },
+            { id: "c57", name: "pH អាស៊ីតខ្សោយ", formula: "\\text{pH} = \\frac{1}{2}(pK_a - \\log C_a)", vars: "C_a=កំហាប់អាស៊ីត", level: "NIE", tags: ["អាស៊ីតបាស"], q: "រូបមន្តប្រហែលសម្រាប់គណនា pH។" },
+            { id: "c58", name: "pH បាសខ្សោយ", formula: "\\text{pH} = 14 - \\frac{1}{2}(pK_b - \\log C_b)", vars: "C_b=កំហាប់បាស", level: "NIE", tags: ["អាស៊ីតបាស"], q: "រូបមន្តសម្រាប់គណនា pH បាសខ្សោយ។" },
+            { id: "c59", name: "តំប៉ុងអាស៊ីត (Buffer)", formula: "\\text{pH} = pK_a + \\log \\frac{[Salt]}{[Acid]}", vars: "Henderson-Hasselbalch", level: "NIE", tags: ["អាស៊ីតបាស"], q: "រក្សា pH ឱ្យនៅថេរ។" },
+            { id: "c60", name: "តំប៉ុងបាស", formula: "\\text{pOH} = pK_b + \\log \\frac{[Salt]}{[Base]}", vars: "Henderson-Hasselbalch", level: "NIE", tags: ["អាស៊ីតបាស"], q: "តំប៉ុងសម្រាប់មជ្ឈដ្ឋានបាស។" },
+            { id: "c61", name: "អ៊ីដ្រូលីស SA+WB", formula: "\\text{pH} = 7 - \\frac{1}{2}(pK_b + \\log C)", vars: "SA=អាស៊ីតខ្លាំង; WB=បាសខ្សោយ", level: "NIE", tags: ["អាស៊ីតបាស"], q: "pH នៃអំបិល NH4Cl។" },
+            { id: "c62", name: "អ៊ីដ្រូលីស WA+SB", formula: "\\text{pH} = 7 + \\frac{1}{2}(pK_a + \\log C)", vars: "WA=អាស៊ីតខ្សោយ; SB=បាសខ្លាំង", level: "NIE", tags: ["អាស៊ីតបាស"], q: "pH នៃអំបិល CH3COONa។" },
+            { id: "c63", name: "អ៊ីដ្រូលីស WA+WB", formula: "\\text{pH} = 7 + \\frac{1}{2}(pK_a - pK_b)", vars: "មិនអាស្រ័យនឹងកំហាប់", level: "NIE", tags: ["អាស៊ីតបាស"], q: "pH នៃអំបិល CH3COONH4។" },
+            { id: "c64", name: "ថេរផលគុណរលាយ Ksp", formula: "K_{sp} = [A^+]^x [B^-]^y", vars: "សម្រាប់អំបិលរលាយតិចតួច", level: "NIE", tags: ["អាស៊ីតបាស"], q: "លំនឹងអំបិលរលាយតិចតួច AgCl។" },
+            { id: "c65", name: "ច្បាប់ពង្រាវ Ostwald", formula: "K_a = \\frac{\\alpha^2 C}{1 - \\alpha} \\approx \\alpha^2 C", vars: "\\alpha=កម្រិតអ៊ីយ៉ុងកម្ម", level: "NIE", tags: ["អាស៊ីតបាស"], q: "កម្រិតបំបែកអាស៊ីតខ្សោយ។" },
+            // --- អគ្គិសនីគីមី (66-73) ---
+            { id: "c66", name: "ប៉ូតង់ស្យែលស្តង់ដារ", formula: "E^\\circ_{cell} = E^\\circ_{cat} - E^\\circ_{ano}", vars: "cat=កាតូត; ano=អាណូត", level: "NIE", tags: ["អគ្គិសនីគីមី"], q: "កំណត់ភាពកើតឯងនៃថ្មពិល។" },
+            { id: "c67", name: "សមីការណឺន (Nernst)", formula: "E = E^\\circ - \\frac{0.0591}{n} \\log Q", vars: "n=ចំនួន e-; Q=ផលធៀបប្រតិកម្ម", level: "NIE", tags: ["អគ្គិសនីគីមី"], q: "ប៉ូតង់ស្យែលនៅកំហាប់មិនស្តង់ដារ។" },
+            { id: "c68", name: "ថាមពលសេរី និង E°", formula: "\\Delta G^\\circ = -n F E^\\circ_{cell}", vars: "F=96500 C/mol", level: "NIE", tags: ["អគ្គិសនីគីមី"], q: "ទំនាក់ទំនងរវាង G និងប៉ូតង់ស្យែល។" },
+            { id: "c69", name: "ច្បាប់ហ្វារ៉ាដេ ទី១", formula: "m = \\frac{M \\cdot I \\cdot t}{n \\cdot F}", vars: "I=ចរន្ត; t=ពេល(s)", level: "NIE", tags: ["អគ្គិសនីគីមី"], q: "បរិមាណសារធាតុរំលាយដោយអគ្គិសនី។" },
+            { id: "c70", name: "ច្បាប់ហ្វារ៉ាដេ ទី២", formula: "\\frac{m_1}{E_1} = \\frac{m_2}{E_2}", vars: "E=ម៉ាសអេគីវ៉ាឡង់", level: "NIE", tags: ["អគ្គិសនីគីមី"], q: "ផើងអគ្គិសនីវិភាគតជាស៊េរី។" },
+            { id: "c71", name: "ភាពចម្លងអគ្គិសនី", formula: "\\kappa = \\frac{1}{\\rho} = \\frac{l}{R \\cdot A}", vars: "R=រេស៊ីស្តង់; A=ផ្ទៃមុខកាត់", level: "NIE", tags: ["អគ្គិសនីគីមី"], q: "សមត្ថភាពចម្លងចរន្តនៃសូលុយស្យុង។" },
+            { id: "c72", name: "ភាពចម្លងម៉ូល", formula: "\\Lambda_m = \\frac{\\kappa \\times 1000}{C}", vars: "C=កំហាប់ម៉ូល (M)", level: "NIE", tags: ["អគ្គិសនីគីមី"], q: "ភាពចម្លងធៀបនឹងកំហាប់។" },
+            { id: "c73", name: "ច្បាប់កុលរ៉ោស", formula: "\\Lambda^\\circ_m = \\nu_+ \\lambda^\\circ_+ + \\nu_- \\lambda^\\circ_-", vars: "\\lambda^\\circ=ភាពចម្លងអ៊ីយ៉ុងអតិបរមា", level: "NIE", tags: ["អគ្គិសនីគីមី"], q: "ភាពចម្លងអតិបរមានៃសូលុយស្យុងកំហាប់សូន្យ។" },
+            // --- ចលនការគីមី (74-82) ---
+            { id: "c74", name: "ល្បឿនទាក់ទង", formula: "v = -\\frac{1}{a}\\frac{d[A]}{dt} = \\frac{1}{c}\\frac{d[C]}{dt}", vars: "aA \\rightarrow cC", level: "NIE", tags: ["ចលនការគីមី"], q: "ល្បឿនកកើតធៀបនឹងល្បឿនបាត់បង់។" },
+            { id: "c75", name: "ច្បាប់ល្បឿន", formula: "v = k [A]^x [B]^y", vars: "k=ថេរល្បឿន; x,y=លំដាប់ប្រតិកម្ម", level: "NIE", tags: ["ចលនការគីមី"], q: "ឥទ្ធិពលកំហាប់ទៅលើល្បឿន។" },
+            { id: "c76", name: "លំដាប់ទីសូន្យ", formula: "[A]_t = [A]_0 - kt", vars: "[A]_0=កំហាប់ដើម", level: "NIE", tags: ["ចលនការគីមី"], q: "ល្បឿនមិនអាស្រ័យនឹងកំហាប់ប្រតិករ។" },
+            { id: "c77", name: "ពាក់កណ្តាលជីវិត លំដាប់សូន្យ", formula: "t_{1/2} = \\frac{[A]_0}{2k}", vars: "t1/2=ពាក់កណ្តាលជីវិត", level: "NIE", tags: ["ចលនការគីមី"], q: "អាស្រ័យនឹងកំហាប់ដើម។" },
+            { id: "c78", name: "លំដាប់ទី១", formula: "\\ln [A]_t = \\ln [A]_0 - kt", vars: "សមីការអាំងតេក្រាល", level: "NIE", tags: ["ចលនការគីមី"], q: "វិទ្យុសកម្មភាគច្រើនស្ថិតក្នុងលំដាប់នេះ។" },
+            { id: "c79", name: "ពាក់កណ្តាលជីវិត លំដាប់ទី១", formula: "t_{1/2} = \\frac{0.693}{k}", vars: "មិនអាស្រ័យនឹងកំហាប់ដើម", level: "NIE", tags: ["ចលនការគីមី"], q: "សំខាន់សម្រាប់ការកំណត់អាយុកាល។" },
+            { id: "c80", name: "លំដាប់ទី២", formula: "\\frac{1}{[A]_t} = \\frac{1}{[A]_0} + kt", vars: "សម្រាប់ប្រតិករតែមួយលំដាប់ទី២", level: "NIE", tags: ["ចលនការគីមី"], q: "ក្រាប 1/[A] ធៀបនឹង t ជារង្វាស់ត្រង់។" },
+            { id: "c81", name: "សមីការអារ៉េញ៉ុស", formula: "k = A \\cdot e^{-\\frac{E_a}{RT}}", vars: "E_a=ថាមពលសកម្ម", level: "NIE", tags: ["ចលនការគីមី"], q: "ឥទ្ធិពលសីតុណ្ហភាពលើថេរល្បឿន។" },
+            { id: "c82", name: "អារ៉េញ៉ុស ២ ចំណុច", formula: "\\ln \\frac{k_2}{k_1} = \\frac{E_a}{R} \\left( \\frac{1}{T_1} - \\frac{1}{T_2} \\right)", vars: "ប្រៀបធៀប T ពីរខុសគ្នា", level: "NIE", tags: ["ចលនការគីមី"], q: "គណនាថាមពលសកម្ម។" },
+            // --- សភាពរឹង និង នុយក្លេអ៊ែរ (83-94) ---
+            { id: "c83", name: "ដង់ស៊ីតេឯកតាគូប", formula: "\\rho = \\frac{Z \\cdot M}{a^3 \\cdot N_A}", vars: "Z=ចំនួនអាតូម; a=ប្រវែងជ្រុង", level: "NIE", tags: ["សភាពរឹង"], q: "ដង់ស៊ីតេនៃគ្រីស្តាល់សូលីត។" },
+            { id: "c84", name: "កាំអាតូម SC", formula: "r = \\frac{a}{2}", vars: "SC=គូបសាមញ្ញ; Z=1", level: "NIE", tags: ["សភាពរឹង"], q: "កាំនៃអាតូមក្នុងទម្រង់ SC។" },
+            { id: "c85", name: "កាំអាតូម BCC", formula: "r = \\frac{\\sqrt{3}a}{4}", vars: "BCC=គូបផ្ចិតមណ្ឌល; Z=2", level: "NIE", tags: ["សភាពរឹង"], q: "កាំនៃអាតូមក្នុងទម្រង់ BCC។" },
+            { id: "c86", name: "កាំអាតូម FCC", formula: "r = \\frac{a}{2\\sqrt{2}}", vars: "FCC=គូបផ្ចិតផ្ទៃមុខ; Z=4", level: "NIE", tags: ["សភាពរឹង"], q: "កាំនៃអាតូមក្នុងទម្រង់ FCC។" },
+            { id: "c87", name: "ប្រសិទ្ធភាពតម្រៀប FCC", formula: "PE = \\frac{Z \\cdot \\frac{4}{3}\\pi r^3}{a^3} = 74\\%", vars: "ភាគរយមាឌអាតូម", level: "NIE", tags: ["សភាពរឹង"], q: "ទម្រង់តម្រៀបដែលហាប់ណែនជាងគេ។" },
+            { id: "c88", name: "ច្បាប់ប្រាក (Bragg)", formula: "n\\lambda = 2d \\sin \\theta", vars: "\\lambda=ជំហានរលក X-Ray; d=ចម្ងាយប្លង់", level: "NIE", tags: ["សភាពរឹង"], q: "សិក្សារចនាសម្ព័ន្ធគ្រីស្តាល់។" },
+            { id: "c89", name: "ផលសងម៉ាស", formula: "\\Delta m = [Z \\cdot m_p + (A-Z) m_n] - M", vars: "m_p=ម៉ាសប្រូតុង; m_n=ម៉ាសណឺត្រុង", level: "NIE", tags: ["នុយក្លេអ៊ែរ"], q: "ម៉ាសដែលបាត់បង់ពេលកកើតស្នូលអាតូម។" },
+            { id: "c90", name: "ថាមពលភ្ជាប់នុយក្លេអ៊ែរ", formula: "E = \\Delta m \\cdot c^2", vars: "c=ល្បឿនពន្លឺ", level: "NIE", tags: ["នុយក្លេអ៊ែរ"], q: "ថាមពលភ្ជាប់នុយក្លេអុងក្នុងស្នូល។" },
+            { id: "c91", name: "ច្បាប់បំបែកវិទ្យុសកម្ម", formula: "N_t = N_0 e^{-\\lambda t}", vars: "\\lambda=ថេរបំបែក", level: "NIE", tags: ["នុយក្លេអ៊ែរ"], q: "បរិមាណសារធាតុនៅសល់ក្រោយពេល t។" },
+            { id: "c92", name: "ពាក់កណ្តាលជីវិត នុយក្លេអ៊ែរ", formula: "t_{1/2} = \\frac{\\ln 2}{\\lambda}", vars: "ដំណើរការលំដាប់ទី១", level: "NIE", tags: ["នុយក្លេអ៊ែរ"], q: "រយៈពេលបំបែកអស់ពាក់កណ្តាល។" },
+            { id: "c93", name: "សកម្មភាពវិទ្យុសកម្ម", formula: "A = -\\frac{dN}{dt} = \\lambda N", vars: "A=Activity", level: "NIE", tags: ["នុយក្លេអ៊ែរ"], q: "អត្រានៃការបំបែកស្នូលអាតូម។" },
+            { id: "c94", name: "ថាមពលភ្ជាប់ក្នុង១នុយក្លេអុង", formula: "BE/A = \\frac{E_{binding}}{A}", vars: "A=ចំនួនម៉ាស", level: "NIE", tags: ["នុយក្លេអ៊ែរ"], q: "រង្វាស់ស្ថិរភាពនៃស្នូលអាតូម។" },
+            // --- គីមីសរីរាង្គ (95-100) ---
+            { id: "c95", name: "កម្រិតមិនឆ្អែត (DoU)", formula: "DoU = C - \\frac{H}{2} - \\frac{X}{2} + \\frac{N}{2} + 1", vars: "X=ហាឡូសែន; N=អាសូត", level: "NIE", tags: ["គីមីសរីរាង្គ"], q: "កំណត់ចំនួនសម្ព័ន្ធទ្វេ ឬរង្វង់។" },
+            { id: "c96", name: "រូបមន្ត អាល់កាន", formula: "C_n H_{2n+2}", vars: "n \\ge 1", level: "NIE", tags: ["គីមីសរីរាង្គ"], q: "អ៊ីដ្រូកាបូនឆ្អែតសុទ្ធ។" },
+            { id: "c97", name: "រូបមន្ត អាល់សែន / ស៊ីក្លូអាល់កាន", formula: "C_n H_{2n}", vars: "DoU = 1", level: "NIE", tags: ["គីមីសរីរាង្គ"], q: "អ៊ីដ្រូកាបូនមានសម្ព័ន្ធទ្វេ១។" },
+            { id: "c98", name: "រូបមន្ត អាល់ស៊ីន / ឌីអែន", formula: "C_n H_{2n-2}", vars: "DoU = 2", level: "NIE", tags: ["គីមីសរីរាង្គ"], q: "អ៊ីដ្រូកាបូនមានសម្ព័ន្ធត្រី១។" },
+            { id: "c99", name: "រូបមន្ត អាល់កុល / អេទែរ", formula: "C_n H_{2n+2}O", vars: "មានអុកស៊ីសែន១ គ្មានសម្ព័ន្ធទ្វេ", level: "NIE", tags: ["គីមីសរីរាង្គ"], q: "សមាសធាតុមានបង្គុំអ៊ីដ្រុកស៊ីល។" },
+            { id: "c100", name: "រូបមន្ត អាល់ដេអ៊ីត / សេតូន", formula: "C_n H_{2n}O", vars: "មានបង្គុំកាបូនីល", level: "NIE", tags: ["គីមីសរីរាង្គ"], q: "សមាសធាតុមានសម្ព័ន្ធទ្វេ C=O។" },
+            
+            // ==========================================
+            // NEW 50 FORMULAS (101-150)
+            // ==========================================
+            { id: "c101", name: "ច្បាប់ EAN", formula: "EAN = Z - X + Y", vars: "Z=លេខអាតូម; X=e-បាត់បង់; Y=e-ទទួលបាន", level: "NIE", tags: ["គីមីកុំផ្លិច"], q: "គណនា Effective Atomic Number របស់លោហៈកណ្តាល។" },
+            { id: "c102", name: "ថាមពល CFSE (អុកតាអែត)", formula: "CFSE = (-0.4x + 0.6y)\\Delta_o", vars: "x=e- ក្នុង t2g; y=e- ក្នុង eg", level: "NIE", tags: ["គីមីកុំផ្លិច"], q: "ថាមពលលំនឹងវាលគ្រីស្តាល់នៃកុំផ្លិចអុកតាអែត។" },
+            { id: "c103", name: "ថាមពល CFSE (ចតុមុខ)", formula: "\\Delta_t = \\frac{4}{9}\\Delta_o", vars: "\\Delta_t=បំបែកចតុមុខ; \\Delta_o=បំបែកអុកតាអែត", level: "NIE", tags: ["គីមីកុំផ្លិច"], q: "ទំនាក់ទំនងរវាងការបំបែកចតុមុខនិងអុកតាអែត។" },
+            { id: "c104", name: "ម៉ូម៉ង់ម៉ាញេទិច (Spin only)", formula: "\\mu = \\sqrt{n(n+2)} \\text{ B.M.}", vars: "n=ចំនួន e- សេស", level: "NIE", tags: ["គីមីកុំផ្លិច"], q: "វាស់ភាពម៉ាញេទិចនៃកុំផ្លិចលោហៈផ្លាស់ប្តូរ។" },
+            { id: "c105", name: "ថេរកោសិកា (Cell Constant)", formula: "G^* = \\frac{l}{A} = \\kappa \\cdot R", vars: "l=ចម្ងាយអេឡិចត្រូត; A=ផ្ទៃមុខកាត់", level: "NIE", tags: ["អគ្គិសនីគីមី"], q: "តើថេរកោសិកាមានខ្នាតដូចម្តេច?" },
+            { id: "c106", name: "ចំនួនដឹកជញ្ជូន (Transport No)", formula: "t_+ = \\frac{\\lambda_+}{\\lambda_+ + \\lambda_-}", vars: "\\lambda=ភាពចម្លងអ៊ីយ៉ុង", level: "NIE", tags: ["អគ្គិសនីគីមី"], q: "ប្រភាគចរន្តដឹកដោយកាចុងក្នុងសូលុយស្យុង។" },
+            { id: "c107", name: "កម្រិតអ៊ីយ៉ុងកម្មពីភាពចម្លង", formula: "\\alpha = \\frac{\\Lambda_m}{\\Lambda^\\circ_m}", vars: "\\Lambda=ភាពចម្លងម៉ូល", level: "NIE", tags: ["អគ្គិសនីគីមី"], q: "គណនាកម្រិតបំបែកនៃអាស៊ីតខ្សោយ។" },
+            { id: "c108", name: "ថេរលំនឹងពីភាពចម្លង", formula: "K_a = \\frac{C \\alpha^2}{1-\\alpha}", vars: "\\alpha=កម្រិតអ៊ីយ៉ុងកម្ម", level: "NIE", tags: ["អគ្គិសនីគីមី"], q: "រកថេរអាស៊ីតដោយប្រើភាពចម្លងអគ្គិសនី។" },
+            { id: "c109", name: "អង់ត្រូពីនៃការរលាយ", formula: "\\Delta S_{fus} = \\frac{\\Delta H_{fus}}{T_m}", vars: "T_m=ចំណុចរលាយ(K)", level: "NIE", tags: ["ទែម៉ូឌីណាមិច"], q: "បម្រែបម្រួលអង់ត្រូពីពេលទឹករលាយ។" },
+            { id: "c110", name: "អង់ត្រូពីនៃរំហួត", formula: "\\Delta S_{vap} = \\frac{\\Delta H_{vap}}{T_b}", vars: "T_b=ចំណុចរំពុះ(K)", level: "NIE", tags: ["ទែម៉ូឌីណាមិច"], q: "បម្រែបម្រួលអង់ត្រូពីពេលទឹកពុះ។" },
+            { id: "c111", name: "ច្បាប់ Trouton", formula: "\\Delta S_{vap} \\approx 88 \\text{ J/(mol\\cdot K)}", vars: "សម្រាប់វត្ថុរាវភាគច្រើន", level: "NIE", tags: ["ទែម៉ូឌីណាមិច"], q: "ច្បាប់ស្មានអង់ត្រូពីរំហួតនៃវត្ថុរាវ។" },
+            { id: "c112", name: "ការប្រែប្រួលអង់ត្រូពី (ឧស្ម័ន)", formula: "\\Delta S = nC_v \\ln\\frac{T_2}{T_1} + nR \\ln\\frac{V_2}{V_1}", vars: "C_v=កម្ដៅម៉ាសមាឌថេរ", level: "NIE", tags: ["ទែម៉ូឌីណាមិច"], q: "គណនាអង់ត្រូពីពេលឧស្ម័នពង្រីកមាឌនិងឡើងកម្តៅ។" },
+            { id: "c113", name: "កម្មន្តអតិបរមា (Max Work)", formula: "W_{max} = -\\Delta G", vars: "\\Delta G=ថាមពលសេរីគីប", level: "NIE", tags: ["ទែម៉ូឌីណាមិច"], q: "កម្មន្តទាញពីប្រតិកម្មឯកឯងមានតម្លៃប៉ុន្មាន?" },
+            { id: "c114", name: "សមីការ Gibbs-Helmholtz", formula: "\\Delta G = \\Delta H + T \\left[\\frac{\\partial(\\Delta G)}{\\partial T}\\right]_P", vars: "T=សីតុណ្ហភាពគិតជាខែលវិន", level: "NIE", tags: ["ទែម៉ូឌីណាមិច"], q: "ទំនាក់ទំនង G និង H តាមការប្រែប្រួលសីតុណ្ហភាព។" },
+            { id: "c115", name: "ល្បឿនអេឡិចត្រុង Bohr", formula: "v_n = 2.18 \\times 10^6 \\frac{Z}{n} \\text{ m/s}", vars: "Z=លេខអាតូម; n=គន្លង", level: "NIE", tags: ["អាតូម"], q: "ល្បឿនអេឡិចត្រុងក្នុងអាតូម H។" },
+            { id: "c116", name: "ចំនួនរលក (Wave Number)", formula: "\\bar{\\nu} = \\frac{1}{\\lambda} = \\frac{\\nu}{c}", vars: "\\lambda=ជំហានរលក", level: "NIE", tags: ["អាតូម"], q: "តើចំនួនរលកក្នុង១សង់ទីម៉ែត្រស្មើប៉ុន្មាន?" },
+            { id: "c117", name: "ចំនួនគន្លងរង (Subshells)", formula: "l = 0 \\text{ ទៅ } (n-1)", vars: "n=លេខកង់ទិចចម្បង", level: "NIE", tags: ["អាតូម"], q: "កំណត់ប្រភេទគន្លង s, p, d, f។" },
+            { id: "c118", name: "ចំនួនអេឡិចត្រុងអតិបរមា", formula: "N = 2n^2", vars: "n=លេខកង់ទិចចម្បង", level: "NIE", tags: ["អាតូម"], q: "អេឡិចត្រុងអតិបរមាក្នុងគន្លងថាមពល n។" },
+            { id: "c119", name: "ម៉ូម៉ង់សន្ទុះមុំគន្លង", formula: "L = \\sqrt{l(l+1)}\\frac{h}{2\\pi}", vars: "l=លេខកង់ទិចរង", level: "NIE", tags: ["អាតូម"], q: "គណនា Orbital angular momentum។" },
+            { id: "c120", name: "ម៉ូម៉ង់សន្ទុះមុំ Spin", formula: "S = \\sqrt{s(s+1)}\\frac{h}{2\\pi}", vars: "s=1/2", level: "NIE", tags: ["អាតូម"], q: "គណនា Spin angular momentum នៃអេឡិចត្រុង។" },
+            { id: "c121", name: "ថេរ Van der Waals (a)", formula: "P_{id} = P_{re} + \\frac{an^2}{V^2}", vars: "a=កម្លាំងទាញរវាងម៉ូលេគុល", level: "NIE", tags: ["ឧស្ម័ន"], q: "កំណែសម្ពាធសម្រាប់ឧស្ម័នពិត។" },
+            { id: "c122", name: "ថេរ Van der Waals (b)", formula: "V_{id} = V_{re} - nb", vars: "b=មាឌពិតរបស់ម៉ូលេគុល", level: "NIE", tags: ["ឧស្ម័ន"], q: "កំណែមាឌសម្រាប់ឧស្ម័នពិត។" },
+            { id: "c123", name: "សីតុណ្ហភាពគ្រីទិច", formula: "T_c = \\frac{8a}{27Rb}", vars: "a,b=ថេរ Van der Waals", level: "NIE", tags: ["ឧស្ម័ន"], q: "សីតុណ្ហភាពខ្ពស់បំផុតដែលអាចបង្រួមឧស្ម័នជាទឹក។" },
+            { id: "c124", name: "សម្ពាធគ្រីទិច", formula: "P_c = \\frac{a}{27b^2}", vars: "a,b=ថេរ Van der Waals", level: "NIE", tags: ["ឧស្ម័ន"], q: "សម្ពាធទាមទារនៅសីតុណ្ហភាពគ្រីទិច។" },
+            { id: "c125", name: "មាឌគ្រីទិច", formula: "V_c = 3b", vars: "b=ថេរមាឌ", level: "NIE", tags: ["ឧស្ម័ន"], q: "មាឌឧស្ម័ន១ម៉ូលនៅចំណុចគ្រីទិច។" },
+            { id: "c126", name: "កត្តាបង្រួម (Compressibility)", formula: "Z = \\frac{PV}{nRT}", vars: "Z=1 (សម្រាប់ឧស្ម័នបរិសុទ្ធ)", level: "NIE", tags: ["ឧស្ម័ន"], q: "រង្វាស់ភាពខុសគ្នារវាងឧស្ម័នពិតនិងឧស្ម័នបរិសុទ្ធ។" },
+            { id: "c127", name: "ល្បឿនប្រូបាបខ្ពស់បំផុត", formula: "u_{mp} = \\sqrt{\\frac{2RT}{M}}", vars: "M=ម៉ាសម៉ូល", level: "NIE", tags: ["ឧស្ម័ន"], q: "ល្បឿនភាគល្អិតឧស្ម័នដែលមានច្រើនជាងគេ។" },
+            { id: "c128", name: "ល្បឿនមធ្យមឧស្ម័ន", formula: "u_{av} = \\sqrt{\\frac{8RT}{\\pi M}}", vars: "M=ម៉ាសម៉ូល", level: "NIE", tags: ["ឧស្ម័ន"], q: "មធ្យមនព្វន្ធនៃល្បឿនម៉ូលេគុលឧស្ម័នទាំងអស់។" },
+            { id: "c129", name: "សូលុយស្យុងអ៊ីសូតូនិច", formula: "\\pi_1 = \\pi_2 \\Rightarrow C_1 = C_2", vars: "\\pi=សម្ពាធអូស្មូស (T ថេរ)", level: "NIE", tags: ["សូលុយស្យុង"], q: "សូលុយស្យុងដែលមានសម្ពាធអូស្មូសស្មើគ្នា។" },
+            { id: "c130", name: "ច្បាប់ Henry (ភាពរលាយ)", formula: "S = k_H \\cdot P", vars: "S=កំហាប់ឧស្ម័ន; P=សម្ពាធ", level: "NIE", tags: ["សូលុយស្យុង"], q: "ឥទ្ធិពលសម្ពាធទៅលើភាពរលាយរបស់ឧស្ម័ន។" },
+            { id: "c131", name: "ប្រភាគម៉ូលក្នុងចំហាយ", formula: "y_A = \\frac{P_A}{P_{total}}", vars: "P_A=សម្ពាធដោយឡែកឧស្ម័ន A", level: "NIE", tags: ["សូលុយស្យុង"], q: "សមាសភាពចំហាយខាងលើសូលុយស្យុង។" },
+            { id: "c132", name: "ថេររំពុះ (Ebullioscopic)", formula: "K_b = \\frac{R T_b^2 M}{1000 \\Delta H_{vap}}", vars: "\\Delta H=អង់តាល់ពីរំហួត", level: "NIE", tags: ["សូលុយស្យុង"], q: "គណនាថេរ K_b នៃធាតុរំលាយដោយប្រើទែម៉ូឌីណាមិច។" },
+            { id: "c133", name: "ថេរកក (Cryoscopic)", formula: "K_f = \\frac{R T_f^2 M}{1000 \\Delta H_{fus}}", vars: "\\Delta H=អង់តាល់ពីរលាយ", level: "NIE", tags: ["សូលុយស្យុង"], q: "គណនាថេរ K_f នៃធាតុរំលាយដោយប្រើទែម៉ូឌីណាមិច។" },
+            { id: "c134", name: "ចរន្តអគ្គិសនី (Current)", formula: "I = \\frac{Q}{t}", vars: "Q=បន្ទុកអគ្គិសនី(C); t=ពេល(s)", level: "NIE", tags: ["អគ្គិសនីគីមី"], q: "អត្រាលំហូរបន្ទុកអគ្គិសនី។" },
+            { id: "c135", name: "ថាមពលអគ្គិសនី (Work)", formula: "W = V \\cdot I \\cdot t = V \\cdot Q", vars: "V=វ៉ុល (Voltage)", level: "NIE", tags: ["អគ្គិសនីគីមី"], q: "កម្មន្តធ្វើដោយចរន្តអគ្គិសនី។" },
+            { id: "c136", name: "ទម្រង់អេឡិចត្រុង ក្រូម", formula: "\\ce{_{24}Cr}: [\\ce{Ar}] \\ce{4s^1 3d^5}", vars: "ពាក់កណ្តាលពេញ (Half-filled)", level: "NIE", tags: ["អាតូម"], q: "ភាពខុសប្រក្រតីនៃការតម្រៀបអេឡិចត្រុងរបស់ Cr។" },
+            { id: "c137", name: "ទម្រង់អេឡិចត្រុង ទង់ដែង", formula: "\\ce{_{29}Cu}: [\\ce{Ar}] \\ce{4s^1 3d^{10}}", vars: "ពេញ (Fully-filled)", level: "NIE", tags: ["អាតូម"], q: "ភាពខុសប្រក្រតីនៃការតម្រៀបអេឡិចត្រុងរបស់ Cu។" },
+            { id: "c138", name: "ភាពខុសគ្នា Cp និង Cv", formula: "C_p - C_v = R", vars: "R=ថេរឧស្ម័ន (សម្រាប់ 1 ម៉ូល)", level: "NIE", tags: ["ទែម៉ូឌីណាមិច"], q: "ទំនាក់ទំនង Mayer រវាងកម្ដៅម៉ាសទាំងពីរ។" },
+            { id: "c139", name: "ផលធៀបកម្ដៅម៉ាស", formula: "\\gamma = \\frac{C_p}{C_v}", vars: "\\gamma > 1 ជានិច្ច", level: "NIE", tags: ["ទែម៉ូឌីណាមិច"], q: "សន្ទស្សន៍អាដ្យាបាទិចនៃឧស្ម័ន។" },
+            { id: "c140", name: "លក្ខខណ្ឌអាដ្យាបាទិច", formula: "P V^\\gamma = \\text{constant}", vars: "q=0 (គ្មានប្តូរកម្ដៅ)", level: "NIE", tags: ["ទែម៉ូឌីណាមិច"], q: "បម្រែបម្រួលប្រព័ន្ធដែលគ្មានការប្តូរកម្ដៅជាមួយមជ្ឈដ្ឋាន។" },
+            { id: "c141", name: "កម្មន្តអាដ្យាបាទិច", formula: "W = \\frac{nR(T_1 - T_2)}{\\gamma - 1}", vars: "T=សីតុណ្ហភាព", level: "NIE", tags: ["ទែម៉ូឌីណាមិច"], q: "កម្មន្តក្នុងលំនាំអាដ្យាបាទិច។" },
+            { id: "c142", name: "ល្បឿនបន្សាយធៀប", formula: "\\frac{r_1}{r_2} = \\sqrt{\\frac{d_2}{d_1}}", vars: "d=ដង់ស៊ីតេឧស្ម័ន", level: "NIE", tags: ["ឧស្ម័ន"], q: "ច្បាប់ក្រាហាម (ទម្រង់ដង់ស៊ីតេ)។" },
+            { id: "c143", name: "កម្រិតអ៊ីយ៉ុងកម្ម ទឹកសុទ្ធ", formula: "\\alpha = \\frac{10^{-7}}{55.5} \\approx 1.8 \\times 10^{-9}", vars: "នៅ 25°C", level: "NIE", tags: ["អាស៊ីតបាស"], q: "កម្រិតដែលទឹកបំបែកខ្លួនជាអ៊ីយ៉ុងមានតិចតួចបំផុត។" },
+            { id: "c144", name: "លំដាប់សូន្យ (T 3/4)", formula: "t_{3/4} = 1.5 \\times t_{1/2}", vars: "t_{3/4}=ពេលបាត់បង់ 75%", level: "NIE", tags: ["ចលនការគីមី"], q: "លក្ខណៈពាក់កណ្តាលជីវិតទី២ នៃលំដាប់សូន្យ។" },
+            { id: "c145", name: "លំដាប់ទី១ (T 3/4)", formula: "t_{3/4} = 2 \\times t_{1/2}", vars: "t_{3/4}=ពេលបាត់បង់ 75%", level: "NIE", tags: ["ចលនការគីមី"], q: "លក្ខណៈពាក់កណ្តាលជីវិតទី២ នៃលំដាប់ទី១។" },
+            { id: "c146", name: "សមីការថាមពលសកម្ម (Log)", formula: "\\log \\frac{k_2}{k_1} = \\frac{E_a}{2.303R} \\left(\\frac{T_2 - T_1}{T_1 T_2}\\right)", vars: "ប្រើ Log គោល 10", level: "NIE", tags: ["ចលនការគីមី"], q: "គណនាថាមពលសកម្មដោយប្រើ Log10។" },
+            { id: "c147", name: "pH នៃសូលុយស្យុងលាយ", formula: "[H^+] = \\frac{V_1 N_1 + V_2 N_2}{V_1 + V_2}", vars: "N=កំហាប់ន័រម៉ាល់", level: "NIE", tags: ["អាស៊ីតបាស"], q: "រក pH ក្រោយលាយអាស៊ីតខ្លាំង២ចូលគ្នា។" },
+            { id: "c148", name: "សមមូលអគ្គិសនីវិភាគ", formula: "Z = \\frac{E}{F}", vars: "E=ម៉ាសអេគីវ៉ាឡង់; F=96500", level: "NIE", tags: ["អគ្គិសនីគីមី"], q: "ច្បាប់ Faraday ទាក់ទងនឹងសមមូលអេឡិចត្រូគីមី។" },
+            { id: "c149", name: "ទិន្នផលកង់ទិច (Yield)", formula: "\\Phi = \\frac{\\text{ម៉ូលេគុលផូតុងរងប្រតិកម្ម}}{\\text{ផូតុងស្រូប}}", vars: "Photochemistry", level: "NIE", tags: ["ចលនការគីមី"], q: "ប្រសិទ្ធភាពនៃប្រតិកម្មគីមីពន្លឺ។" },
+            { id: "c150", name: "រូបមន្ត អ៊ីសូមែអុបទិច", formula: "N = 2^n", vars: "n=ចំនួនកាបូនអាស៊ីមេទ្រី (Chiral)", level: "NIE", tags: ["គីមីសរីរាង្គ"], q: "ចំនួនអ៊ីសូមែអុបទិចអតិបរមាក្នុងម៉ូលេគុល។" }
+        ];
+
+        // --- ICONS ---
+        const Icons = {
+            Beaker: () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4.5 3h15"/><path d="M6 3v16a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V3"/><path d="M6 14h12"/></svg>,
+            Flame: () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.1.2-2.1.5-3z"/></svg>,
+            Search: () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>,
+            ChevronDown: ({ rotated }) => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`transition-transform duration-200 ${rotated ? 'rotate-180' : ''}`}><polyline points="6 9 12 15 18 9"/></svg>
+        };
+
+        // --- EXPERT MATH COMPONENT ---
+        const MathFormula = ({ tex }) => {
+            const containerRef = useRef(null);
+            useEffect(() => {
+                if (containerRef.current && window.MathJax) {
+                    containerRef.current.innerHTML = '';
+                    const mathNode = document.createElement('div');
+                    mathNode.className = "math-inner";
+                    mathNode.innerHTML = '$$' + tex + '$$';
+                    containerRef.current.appendChild(mathNode);
+                    window.MathJax.typesetPromise([mathNode]).catch(err => console.log(err));
+                }
+            }, [tex]);
+            return (
+                <div className="math-scroll-wrapper bg-slate-50 rounded-xl border border-slate-100 mb-4">
+                    <div ref={containerRef} className="text-indigo-900" />
+                </div>
+            );
+        };
+
+        const RecipeCard = ({ item }) => {
+            const [expanded, setExpanded] = useState(false);
+            const vars = item.vars ? item.vars.split(';').map(v=>v.trim()).filter(v=>v) : [];
+
+            return (
+                <div className="bg-white rounded-2xl p-5 border-t-4 border-indigo-500 shadow-sm card-hover flex flex-col justify-between h-full">
+                    <div>
+                        <div className="mb-3"><span className="text-[11px] font-bold uppercase bg-indigo-50 text-indigo-600 px-3 py-1 rounded-full">{item.tags[0]}</span></div>
+                        <h3 className="text-lg font-bold text-gray-800 mb-3 font-sans leading-snug">{item.name}</h3>
+                        <MathFormula tex={item.formula} />
+                    </div>
+                    <div>
+                        <button onClick={() => setExpanded(!expanded)} className="w-full flex items-center justify-between text-xs font-bold text-gray-500 hover:text-indigo-600 py-2 border-t border-gray-100">
+                            <span>អថេរ (Variables)</span><Icons.ChevronDown rotated={expanded} />
+                        </button>
+                        {expanded && (
+                            <ul className="mt-2 space-y-2 text-sm text-gray-600 bg-gray-50 p-3 rounded-lg border border-gray-100">
+                                {vars.map((v, i) => {
+                                    const [key, val] = v.split('=');
+                                    return <li key={i}><span className="font-bold text-indigo-800">{key}</span> <span className="text-gray-400">=</span> {val}</li>
+                                })}
+                            </ul>
+                        )}
+                    </div>
+                </div>
+            );
+        };
+
+        const QuizModal = ({ isOpen, onClose, onNext, item }) => {
+            if (!isOpen || !item) return null;
+            const [revealed, setRevealed] = useState(false);
+            useEffect(() => setRevealed(false), [item]);
+
+            return (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+                    <div className="bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden relative">
+                        <button onClick={onClose} className="absolute top-4 right-4 text-white/70 hover:text-white z-10 text-2xl">✕</button>
+                        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-6 text-white text-center">
+                            <h2 className="text-2xl font-bold brand-font">សំណួរប្រឡង (Quiz)</h2>
+                        </div>
+                        <div className="p-8">
+                            <p className="text-xl font-medium text-gray-800 text-center mb-6">"{item.q}"</p>
+                            {revealed ? (
+                                <div className="bg-green-50 border border-green-200 rounded-xl p-4 text-center mb-6 overflow-x-auto">
+                                    <h3 className="text-green-800 font-bold mb-1">{item.name}</h3>
+                                    <MathFormula tex={item.formula} />
+                                </div>
+                            ) : (
+                                <div className="h-20 flex items-center justify-center bg-gray-50 rounded-xl border-2 border-dashed border-gray-200 mb-6 text-gray-400 italic">រូបមន្តត្រូវបានលាក់...</div>
+                            )}
+                            <div className="flex gap-3">
+                                {!revealed ? (
+                                    <button onClick={() => setRevealed(true)} className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-xl shadow-lg">បង្ហាញចម្លើយ</button>
+                                ) : (
+                                    <button onClick={onNext} className="flex-1 bg-gray-800 hover:bg-gray-900 text-white font-bold py-3 rounded-xl shadow-lg">សំណួរបន្ទាប់</button>
+                                )}
+                                <button onClick={onClose} className="px-6 text-gray-500 font-bold hover:text-gray-700">បិទ</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const App = () => {
+            const [filter, setFilter] = useState("ទាំងអស់");
+            const [search, setSearch] = useState("");
+            const [quizOpen, setQuizOpen] = useState(false);
+            const [quizItem, setQuizItem] = useState(null);
+            
+            const filtered = useMemo(() => preloadedData.filter(d => 
+                (filter === "ទាំងអស់" || d.tags.includes(filter)) && 
+                (d.name.toLowerCase().includes(search.toLowerCase()) || d.formula.toLowerCase().includes(search.toLowerCase()))
+            ), [filter, search]);
+
+            const startQuiz = () => {
+                setQuizItem(preloadedData[Math.floor(Math.random() * preloadedData.length)]);
+                setQuizOpen(true);
+            };
+
+            const categories = ["ទាំងអស់", "បរិមាណវិភាគ", "ឧស្ម័ន", "អាតូម", "សូលុយស្យុង", "ទែម៉ូឌីណាមិច", "លំនឹងគីមី", "អាស៊ីតបាស", "អគ្គិសនីគីមី", "ចលនការគីមី", "សភាពរឹង", "នុយក្លេអ៊ែរ", "គីមីសរីរាង្គ", "គីមីកុំផ្លិច"];
+
+            return (
+                <div className="min-h-screen pb-12">
+                    <nav className="bg-white border-b border-gray-200 sticky top-0 z-30 shadow-sm">
+                        <div className="max-w-7xl mx-auto px-4 h-16 flex justify-between items-center">
+                            <div className="flex items-center gap-3">
+                                <div className="bg-gradient-to-br from-blue-600 to-indigo-600 text-white p-2 rounded-lg shadow-md"><Icons.Beaker /></div>
+                                <div className="flex flex-col">
+                                    <span className="text-xl font-bold text-gray-800 brand-font">500 MCQ Formula</span>
+                                    <span className="text-xs text-indigo-600 font-bold">NIE Edition (150 Formulas)</span>
+                                </div>
+                            </div>
+                            <button onClick={startQuiz} className="flex items-center gap-2 px-4 py-2 text-sm font-bold text-orange-900 bg-orange-400 hover:bg-orange-500 rounded-full shadow-md transition-all hover:scale-105">
+                                <Icons.Flame /> ធ្វើតេស្ត Quiz
+                            </button>
+                        </div>
+                    </nav>
+
+                    <main className="max-w-7xl mx-auto px-4 py-8">
+                        <div className="mb-8 space-y-4">
+                            <div className="relative max-w-2xl mx-auto md:mx-0">
+                                <div className="absolute left-4 top-3.5 text-gray-400"><Icons.Search /></div>
+                                <input type="text" placeholder="ស្វែងរករូបមន្ត (ឧទាហរណ៍៖ ទែម៉ូ, ម៉ូល...)" className="w-full pl-12 pr-4 py-3 rounded-xl border-2 border-gray-200 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/20 outline-none transition-all font-sans" 
+                                    value={search} onChange={e => setSearch(e.target.value)} />
+                            </div>
+                            <div className="flex gap-2 overflow-x-auto pb-4 math-scroll-wrapper" style={{padding: '0 0 10px 0', textAlign: 'left'}}>
+                                {categories.map(cat => (
+                                    <button key={cat} onClick={() => setFilter(cat)} className={`whitespace-nowrap px-5 py-2 rounded-full text-sm font-bold shadow-sm transition-all ${filter === cat ? 'bg-indigo-600 text-white scale-105' : 'bg-white text-gray-600 border border-gray-200 hover:text-indigo-600'}`}>{cat}</button>
+                                ))}
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                            {filtered.map(item => <RecipeCard key={item.id} item={item} />)}
+                        </div>
+                        
+                        {filtered.length === 0 && (
+                            <div className="text-center py-20 text-gray-400 font-bold text-xl">
+                                មិនមានរូបមន្តដែលអ្នកកំពុងស្វែងរកទេ...
+                            </div>
+                        )}
+                    </main>
+
+                    <QuizModal isOpen={quizOpen} onClose={() => setQuizOpen(false)} onNext={() => { setQuizOpen(false); setTimeout(startQuiz, 300); }} item={quizItem} />
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
